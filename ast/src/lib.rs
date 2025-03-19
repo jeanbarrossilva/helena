@@ -14,25 +14,23 @@
 //!
 //! Library by which abstract syntax trees (ASTs) are generated for Helena files.
 
-use std::{any::TypeId, collections::HashMap, sync::OnceLock};
+use std::{any::TypeId, sync::OnceLock};
 
 use crate::{
-  function::FunctionNode,
-  node::{IdentifierNode, NewlineNode, NonStrictNode, OperationNode, SpacingNode}
+  node::{NewlineNode, Node}
 };
 
+mod branch;
+mod common;
 mod function;
 mod node;
 
-enum Tree<T>
-where
-  T: NonStrictNode
-{
+enum Tree<T: Node> {
   Failed(),
   Successful(Vec<T>)
 }
 
-pub fn generate_ast(source: &str) -> Vec<impl NonStrictNode> {
+pub fn generate_ast(source: &str) -> Vec<impl Node> {
   max_leafing().get()
 }
 
@@ -41,7 +39,12 @@ pub fn generate_ast(source: &str) -> Vec<impl NonStrictNode> {
 /// is required for its presence to be valid.
 fn max_leafing<'a>() -> &'a [TypeId; 2] {
   static MAX_LEAFING: OnceLock<[TypeId; 2]> = OnceLock::new();
-  MAX_LEAFING.get_or_init(|| [TypeId::of::<NewlineNode<_>>(), TypeId::of::<FunctionNode>()])
+  MAX_LEAFING.get_or_init(|| {
+    [
+      TypeId::of::<NewlineNode<_, _>>(),
+      TypeId::of::<FunctionNode>()
+    ]
+  })
 }
 
 #[cfg(test)]
