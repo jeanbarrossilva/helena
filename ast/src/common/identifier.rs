@@ -12,58 +12,45 @@
 
 use regex::Regex;
 
-use crate::{
-  branch::Branch,
-  node::{Node, UnmatchedPatternError}
-};
+use crate::node::{Node, UnmatchedPatternError};
 
-/// Node of a user-defined name for a structure which has either being declared or has already been.
-#[derive(Debug)]
-pub(crate) struct IdentifierNode<'a, N: Node> {
-  /// Textual representation of this node in the AST.
-  text: &'a str,
-
-  /// Vertical position of this node in the AST. Corresponds to the number of the line in which it
-  /// is located in the source file.
-  column: u32,
-
-  /// Horizontal position of this node in the AST. Corresponds to the index of the character that
-  /// delimits the start of this node in the line of the source file in which it is located.
-  row: u32
-}
-
-impl<'a, N: Node> IdentifierNode<'a, N> {
-  /// Instantiates an identifier node.
-  pub(crate) fn new(text: &'a str, column: u32, row: u32) -> Self {
-    IdentifierNode {
-      text,
-      column,
-      row
-    }
-  }
-}
-
-impl<'a, N: Node> Node for IdentifierNode<'a, N> {
-  fn column(&'a self) -> u32 {
-    self.column
-  }
-
-  fn row(&'a self) -> u32 {
-    self.row
-  }
-
-  fn text(&'a self) -> Result<&'a str, UnmatchedPatternError> {
-    crate::node::matching(Regex::new(r"[a-zA-Z0-9_]*"), self.text)
-  }
-}
-
-impl<'a, N1: Node> Branch<'_, _, IdentifierNode<'a, N1>> {
+impl<'a> Node<'a> {
   /// Denotes that an identifier node is expected to follow the current node.
-  pub(crate) fn identifier<N2: Node, F: Fn(&IdentifierNode<'a, N1>) -> &Branch<'a, N1, N2>>(
-    &mut self,
+  pub(crate) fn expect_identifier<F: Fn(Self) -> Result<Self, UnmatchedPatternError>>(
+    self,
     text: &'a str,
     chain: F
-  ) -> &'a Self {
-    self.expect(&IdentifierNode::new(text, self.column_of(text), self.row_of(text)), chain)
+  ) -> Result<Self, UnmatchedPatternError> {
+    self.expect_with_pattern(
+      Regex::new(r"[a-zA-Z0-9]*").unwrap(),
+      || {
+        if text.is_empty() {
+          return String::from("Expected an identifier.");
+        }
+        format!(
+          "{} is invalid. An identifier can only letters A–Z and digits.",
+          text
+        )
+      },
+      text,
+      chain
+    )
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::node::Node;
+
+  #[test]
+  fn errors_when_identifier_is_expected_and_is_empty() {
+    println!(
+      "{}",
+      Node::new("", 0, 0).expect_identifier("", |node| Ok(node)).unwrap()
+    );
+    assert!(
+      Node::new("", 0, 0).expect_identifier("", |node| Ok(node)).ok()
+        == Node::new("", 0, 0).expect_identifier("", |node| Ok(node)).ok()
+    )
   }
 }

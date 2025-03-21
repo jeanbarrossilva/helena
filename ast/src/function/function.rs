@@ -10,63 +10,45 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-use std::sync::OnceLock;
-use regex::Regex;
+use crate::node::{Node, UnmatchedPatternError};
 
-use crate::{
-  branch::Branch,
-  common::{identifier::IdentifierNode, operation::OperationNode, spacing::SpacingNode},
-  node::{Node, UnmatchedPatternError}
-};
-
+/// Description of a declaration of a parameter to be passed into a function as a value.
 #[derive(Debug)]
-pub(crate) struct ValueParameter<'a> {
-  /// Name of the type of the value as it was input by the user: may or may not be qualified.
-  pub(crate) type_name: &'a str,
+struct ValueParameter<'a> {
+  /// Name of the type of the value as it was input by the user (may or may not be qualified).
+  type_name: &'a str,
 
   /// Name attributed to this value parameter.
-  pub(crate) identifier: &'a str
+  identifier: &'a str
 }
 
-/// Node of a declaration of a function.
-#[derive(Debug)]
-pub(crate) struct FunctionNode<'a> {
-  /// Identifier of the function.
-  identifier: &'a str,
-
-  /// Values expected to be passed in to the function as parameters.
-  value_parameters: Vec<ValueParameter<'a>>,
-
-  /// Vertical position of this node in the AST. Corresponds to the number of the line in which it
-  /// is located in the source file.
-  column: u32,
-
-  /// Horizontal position of this node in the AST. Corresponds to the index of the character that
-  /// delimits the start of this node in the line of the source file in which it is located.
-  row: u32
-}
-
-impl<'a> Node for FunctionNode<'a> {
-  fn column(&'a self) -> u32 {
-    self.column
-  }
-
-  fn row(&'a self) -> u32 {
-    self.row
-  }
-
-  fn text(&'a self) -> Result<&'a str, UnmatchedPatternError> {
-    Ok("func")
-  }
-
-  fn branch(&'a self) -> &'a Branch<'a, IdentifierNode<'a, impl Node>> {
-    static BRANCH: OnceLock<Branch<'a>> = OnceLock::new();
-    BRANCH.get_or_init(|| Branch::new("func", self.column(), self.row()));
-    vec![Some(IdentifierNode::new(
-      self.identifier,
-      self.column,
-      self.row,
-      vec![Some(ValueParameterListDeclarationStartNode {})]
-    ))]
+impl<'a> Node<'a> {
+  fn function(
+    self,
+    identifier: &'a str,
+    value_parameters: &'a [ValueParameter<'a>]
+  ) -> Result<Self, UnmatchedPatternError> {
+    self.expect("func", |node| {
+      node.expect_spacing(|node| {
+        node.expect_identifier(identifier, |node| {
+          node.expect("(", |node| {
+            value_parameters.iter().fold(
+              node.expect(")", |node| node.expect(":", |node| node.leaf())),
+              |value_parameter_node, value_parameter| {
+                value_parameter_node.and_then(|node| {
+                  node.expect_identifier(value_parameter.type_name, |node| {
+                    node.expect_spacing(|node| {
+                      node
+                        .expect_identifier(value_parameter.identifier, |node| Ok(node))
+                        .and_then(|node| node.leaf())
+                    })
+                  })
+                })
+              }
+            )
+          })
+        })
+      })
+    })
   }
 }

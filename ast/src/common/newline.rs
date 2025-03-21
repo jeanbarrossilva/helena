@@ -10,21 +10,20 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-//! # AST
-//!
-//! Library by which abstract syntax trees (ASTs) are generated for Helena files.
-
 use crate::node::{Node, UnmatchedPatternError};
 
-mod common;
-mod function;
-pub mod node;
+#[cfg(windows)]
+const NEWLINE: &str = "\r\n";
 
-pub enum Tree<'a> {
-  Failed(Vec<Result<Node<'a>, UnmatchedPatternError>>),
-  Successful(Node<'a>)
-}
+#[cfg(not(windows))]
+const NEWLINE: &str = "\n";
 
-pub fn generate_ast(_source: &str) -> Tree {
-  todo!()
+impl<'a> Node<'a> {
+  /// Denotes that a newline node is expected to follow this node.
+  pub(crate) fn expect_newline<F: Fn(Self) -> Result<Self, UnmatchedPatternError>>(
+    self,
+    chain: F
+  ) -> Result<Self, UnmatchedPatternError> {
+    self.expect(NEWLINE, chain)
+  }
 }

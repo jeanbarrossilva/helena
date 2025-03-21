@@ -10,110 +10,122 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-use std::fmt::{Debug, Display, Formatter};
-use std::sync::OnceLock;
+use std::fmt::{Display, Formatter};
+
 use regex::Regex;
-
-use crate::branch::Branch;
-
-#[cfg(windows)]
-const NEWLINE: &str = "\r\n";
-
-#[cfg(not(windows))]
-const NEWLINE: &str = "\n";
 
 /// Error that occurs when the name of a node that is required to follow a specific pattern does not
 /// match it.
 #[derive(Debug)]
-pub struct UnmatchedPatternError<'a> {
-  /// The pattern not matched by the text.
-  pattern: Regex,
-
-  /// The text that does not match the pattern specified by the node.
-  text: &'a str
+pub struct UnmatchedPatternError {
+  /// The message to be displayed that describes the error.
+  message: String
 }
 
-impl Display for UnmatchedPatternError<'_> {
+impl Display for UnmatchedPatternError {
   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    Display::fmt(
-      &format!(
-        "Textual representation of node (\"{}\") does not match \"{}\".",
-        self.text, self.pattern
-      ),
-      f
-    )
+    Display::fmt(&self.message, f)
   }
 }
 
-impl std::error::Error for UnmatchedPatternError<'_> {}
+impl std::error::Error for UnmatchedPatternError {}
 
 /// A node (token) in the AST.
-pub trait Node: Debug {
-  /// Obtains the vertical position of this node in the AST. Corresponds to the number of the line
-  /// in which it is located in the source file.
-  fn column(&self) -> u32;
+#[derive(Debug, PartialEq)]
+pub struct Node<'a> {
+  /// Textual representation of this node in the AST.
+  text: &'a str,
 
-  /// Obtains the horizontal position of this node in the AST. Corresponds to the index of the
-  /// character that delimits the start of this node in the line of the source file in which it is
-  /// located.
-  fn row(&self) -> u32;
-
-  /// Obtains the textual representation of this node in the AST.
-  fn text(&self) -> Result<&str, UnmatchedPatternError>;
-
-  /// Obtains the branch by which the nodes that are expected to follow this one are defined.
-  fn branch(&self) -> &Branch<Self, impl Node> {
-    static BRANCH: OnceLock<Branch<Self, impl Node>> = OnceLock::new();
-    BRANCH.get_or_init(|| Branch::from(self))
-  }
-}
-
-/// Node of an OS-specific linebreak.
-#[derive(Debug)]
-pub(crate) struct NewlineNode<'a, N: Node> {
   /// Vertical position of this node in the AST. Corresponds to the number of the line in which it
   /// is located in the source file.
   column: u32,
 
   /// Horizontal position of this node in the AST. Corresponds to the index of the character that
   /// delimits the start of this node in the line of the source file in which it is located.
-  row: u32
+  row: u32,
+
+  /// Expected next nodes; a [None] being present in this [Vec] means that this can be a leaf node,
+  /// while [Some]s hold the nodes by which this one can be followed. Nothing prevents both
+  /// scenarios from being true: there might be the expectation for this node to be a leaf node,
+  /// but, in case it is not, for there to be other specific nodes that succeed it.
+  ///
+  /// ```rust
+  /// use ast::node::Node;
+  ///
+  /// // Here, "a" can either be a leaf node — be the final one of the rule — or be followed by "b".
+  /// Node::new("a", 0, 0).expect("b", |node| Ok(node)).and_then(|node| node.leaf()).unwrap();
+  /// ```
+  branches: Vec<Option<Node<'a>>>
 }
 
-impl<N> NewlineNode<'_, N> {
-  /// Instantiates a newline node.
-  fn new(column: u32, row: u32) -> Self {
-    NewlineNode {
+impl<'a> Node<'a> {
+  /// Instantiates a node.
+  pub fn new(text: &'a str, column: u32, row: u32) -> Self {
+    Node {
+      text,
       column,
-      row
+      row,
+      branches: Vec::new()
     }
   }
 }
 
-impl<N: Node> Node for NewlineNode<N> {
-  fn column(&self) -> u32 {
+impl<'a> Node<'a> {
+  /// Denotes that this node can be the last one — a leaf — of the lexeme.
+  pub fn leaf(mut self) -> Result<Self, UnmatchedPatternError> {
+    if self.branches.contains(&None) {
+      return Ok(self);
+    }
+    self.branches.push(None);
+    Ok(self)
+  }
+
+  /// Denotes that a node whose text matches the given pattern can be the next one.
+  pub(crate) fn expect_with_pattern<
+    E: Fn() -> String,
+    C: Fn(Self) -> Result<Self, UnmatchedPatternError>
+  >(
+    self,
+    pattern: Regex,
+    error_message: E,
+    text: &'a str,
+    chain: C
+  ) -> Result<Self, UnmatchedPatternError> {
+    if !pattern.is_match(text) {
+      return Err(UnmatchedPatternError {
+        message: error_message()
+      });
+    }
+    self.expect(text, chain)
+  }
+
+  /// Denotes that a node with the given textual representation can be the next one.
+  pub fn expect<F: Fn(Self) -> Result<Self, UnmatchedPatternError>>(
+    mut self,
+    text: &'a str,
+    chain: F
+  ) -> Result<Self, UnmatchedPatternError> {
+    let next = Self::new(text, self.next_column(text), self.next_row(text));
+    self.branches.push(chain(next).ok());
+    Ok(self)
+  }
+
+  /// Obtains the column in which the node that follows this one is expected to be.
+  fn next_column(&'a self, text: &'a str) -> u32 {
+    if self.column > 0 && self.next_row(text) == 0 {
+      return self.column + 1;
+    }
     self.column
   }
 
-  fn row(&self) -> u32 {
-    self.row
-  }
-
-  fn text(&self) -> Result<&str, UnmatchedPatternError> {
-    Ok(NEWLINE)
+  /// Obtains the row in which the node that follows this one is expected to be.
+  fn next_row(&'a self, text: &'a str) -> u32 {
+    (self.row as usize + text.len()).min(100) as u32
   }
 }
 
-pub(crate) fn matching<'a>(
-  pattern: Result<Regex, regex::Error>,
-  text: &str
-) -> Result<&'a str, UnmatchedPatternError> {
-  let unwrapped_pattern = pattern.unwrap();
-  if !unwrapped_pattern.is_match(text) {
-    return Err(UnmatchedPatternError {
-      pattern: unwrapped_pattern,
-      text
-    });
+impl Display for Node<'_> {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}\n", self.text)
   }
-  Ok(text)
 }
