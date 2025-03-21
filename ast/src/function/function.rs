@@ -14,7 +14,7 @@ use crate::node::{Node, UnmatchedPatternError};
 
 /// Description of a declaration of a parameter to be passed into a function as a value.
 #[derive(Debug)]
-struct ValueParameter<'a> {
+struct ValueParameterDeclaration<'a> {
   /// Name of the type of the value as it was input by the user (may or may not be qualified).
   type_name: &'a str,
 
@@ -23,23 +23,24 @@ struct ValueParameter<'a> {
 }
 
 impl<'a> Node<'a> {
-  fn function(
+  /// Denotes that a declaration of a function is expected to follow this node.
+  fn branch_to_function_declaration(
     self,
     identifier: &'a str,
-    value_parameters: &'a [ValueParameter<'a>]
+    value_parameters: &'a [ValueParameterDeclaration<'a>]
   ) -> Result<Self, UnmatchedPatternError> {
-    self.expect("func", |node| {
-      node.expect_spacing(|node| {
-        node.expect_identifier(identifier, |node| {
-          node.expect("(", |node| {
+    self.branch_to("func", |node| {
+      node.branch_to_space(|node| {
+        node.branch_to_identifier(identifier, |node| {
+          node.branch_to("(", |node| {
             value_parameters.iter().fold(
-              node.expect(")", |node| node.expect(":", |node| node.leaf())),
+              node.branch_to(")", |node| node.branch_to(":", |node| node.leaf())),
               |value_parameter_node, value_parameter| {
                 value_parameter_node.and_then(|node| {
-                  node.expect_identifier(value_parameter.type_name, |node| {
-                    node.expect_spacing(|node| {
+                  node.branch_to_identifier(value_parameter.type_name, |node| {
+                    node.branch_to_space(|node| {
                       node
-                        .expect_identifier(value_parameter.identifier, |node| Ok(node))
+                        .branch_to_identifier(value_parameter.identifier, |node| Ok(node))
                         .and_then(|node| node.leaf())
                     })
                   })
@@ -50,5 +51,23 @@ impl<'a> Node<'a> {
         })
       })
     })
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::{function::function::ValueParameterDeclaration, node::Node};
+
+  #[test]
+  fn branches_to_a_function_declaration() {
+    assert!(Node::default()
+      .branch_to_function_declaration(
+        "main",
+        &[ValueParameterDeclaration {
+          type_name:  "string[]",
+          identifier: "args"
+        }]
+      )
+      .is_ok())
   }
 }

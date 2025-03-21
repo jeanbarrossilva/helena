@@ -16,13 +16,14 @@ use crate::node::{Node, UnmatchedPatternError};
 
 impl<'a> Node<'a> {
   /// Denotes that an identifier node is expected to follow the current node.
-  pub(crate) fn expect_identifier<F: Fn(Self) -> Result<Self, UnmatchedPatternError>>(
+  pub(crate) fn branch_to_identifier<F: Fn(Self) -> Result<Self, UnmatchedPatternError>>(
     self,
     text: &'a str,
     chain: F
   ) -> Result<Self, UnmatchedPatternError> {
-    self.expect_with_pattern(
-      Regex::new(r"[a-zA-Z0-9]*").unwrap(),
+    self.branch_to_named_and_patterned(
+      "Identifier",
+      Regex::new(r"[a-zA-Z0-9]+").unwrap(),
       || {
         if text.is_empty() {
           return String::from("Expected an identifier.");
@@ -43,14 +44,17 @@ mod tests {
   use crate::node::Node;
 
   #[test]
-  fn errors_when_identifier_is_expected_and_is_empty() {
-    println!(
-      "{}",
-      Node::new("", 0, 0).expect_identifier("", |node| Ok(node)).unwrap()
-    );
-    assert!(
-      Node::new("", 0, 0).expect_identifier("", |node| Ok(node)).ok()
-        == Node::new("", 0, 0).expect_identifier("", |node| Ok(node)).ok()
-    )
+  fn errors_when_branching_to_an_empty_identifier() {
+    assert!(Node::default().branch_to_identifier("", |node| Ok(node)).is_err())
+  }
+
+  #[test]
+  fn errors_when_branching_to_an_invalid_identifier() {
+    assert!(Node::default().branch_to_identifier("", |node| Ok(node)).is_err())
+  }
+
+  #[test]
+  fn succeeds_when_branching_to_a_valid_identifier() {
+    assert!(Node::default().branch_to_identifier("main", |node| Ok(node)).is_ok())
   }
 }

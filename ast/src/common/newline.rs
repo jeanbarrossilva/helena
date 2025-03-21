@@ -13,17 +13,27 @@
 use crate::node::{Node, UnmatchedPatternError};
 
 #[cfg(windows)]
-const NEWLINE: &str = "\r\n";
+pub(crate) const NEWLINE: &str = "\r\n";
 
 #[cfg(not(windows))]
-const NEWLINE: &str = "\n";
+pub(crate) const NEWLINE: &str = "\n";
 
 impl<'a> Node<'a> {
   /// Denotes that a newline node is expected to follow this node.
-  pub(crate) fn expect_newline<F: Fn(Self) -> Result<Self, UnmatchedPatternError>>(
+  pub(crate) fn branch_to_newline<F: Fn(Self) -> Result<Self, UnmatchedPatternError>>(
     self,
     chain: F
   ) -> Result<Self, UnmatchedPatternError> {
-    self.expect(NEWLINE, chain)
+    self.branch_to_named("Newline", NEWLINE, chain)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::node::Node;
+
+  #[test]
+  fn succeeds_when_branching_to_a_newline() {
+    assert!(Node::default().branch_to_newline(|node| Ok(node)).is_ok())
   }
 }
