@@ -15,11 +15,19 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-cmake_minimum_required(VERSION 4.0.2)
-project(Helena LANGUAGES C)
+function(link_testing_library)
+  find_package(PkgConfig)
+  if(NOT PKG_CONFIG_FOUND)
+    message(FATAL_ERROR
+            "pkg-config is required for retrieving test dependencies but is not
+            installed."
+    )
+    return()
+  endif()
+  pkg_check_modules(CHECK REQUIRED check)
+  include_directories(${CHECK_INCLUDE_DIRS})
+  link_directories(${CHECK_LIBRARY_DIRS})
+  add_definitions(${CHECK_CFLAGS_OTHER})
+endfunction()
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/configuration)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
-                    ${CMAKE_CURRENT_SOURCE_DIR}/tooling/argparser)
-add_library(helenaLexer src/lexer.c)
-add_subdirectory(tests)
+link_testing_library()

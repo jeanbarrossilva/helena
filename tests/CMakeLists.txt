@@ -15,11 +15,7 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-cmake_minimum_required(VERSION 4.0.2)
-project(Helena LANGUAGES C)
+include(HelenaTestPlan)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/configuration)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
-                    ${CMAKE_CURRENT_SOURCE_DIR}/tooling/argparser)
-add_library(helenaLexer src/lexer.c)
-add_subdirectory(tests)
+add_library(helenaLexerTests lexer.tests.c)
+target_link_libraries(helenaLexerTests PRIVATE helenaLexer)
