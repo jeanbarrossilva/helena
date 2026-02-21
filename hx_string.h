@@ -74,9 +74,9 @@ enum ConcatenationStrategy {
  * to another, but two issues arise:
  *
  * 1. Memory allocated for the destination may be greater than the sum of its
- * current size and that of the source being appended. In case this is not taken
- * care of later, an attacker may write to the remaining bytes, injecting code
- * and/or causing an overflow.
+ * length, that of the source being appended and that of the terminator. In case
+ * this is not taken care of later, an attacker may write to the remaining
+ * bytes, injecting code and/or causing an overflow.
  * 2. The source may not fit into the destination. In this scenario, the
  * resulting string will be truncated, without the API giving any indication
  * that truncation occurred; furthermore, the string may not be null-terminated,
