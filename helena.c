@@ -19,9 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <hx/limits.h>
+#include <hx/string.h>
 
-#include "hx_limits.h"
-#include "hx_string.h"
 #include "tooling/argparser/argparser.h"
 
 void helena_describe() {

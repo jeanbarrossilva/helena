@@ -16,8 +16,8 @@
  * the License.
  */
 
-#ifndef HELENA_HX_STRINGS_H
-#define HELENA_HX_STRINGS_H
+#ifndef HX_STRINGS_H
+#define HX_STRINGS_H
 
 #include <stdio.h>
 
@@ -118,4 +118,4 @@ size_t hx_strcat(char *destination,
                  const char *source,
                  ConcatenationStrategy strategy);
 
-#endif //HELENA_HX_STRINGS_H
+#endif

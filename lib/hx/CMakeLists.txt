@@ -16,8 +16,5 @@ specific language governing permissions and limitations under the License.
 ]]
 
 cmake_minimum_required(VERSION 4.0.2)
-project(Helena LANGUAGES C)
-
-add_subdirectory(lib/hx)
-add_executable(helena helena.c)
-target_link_libraries(helena PRIVATE hx)
+add_library(hx src/string.c)
+target_include_directories(hx PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

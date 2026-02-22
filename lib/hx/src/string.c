@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hx_string.h"
+#include "../include/hx/string.h"
 
 size_t hx_strcat(char *destination,
                  const size_t destination_size,

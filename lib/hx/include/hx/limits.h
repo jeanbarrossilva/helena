@@ -16,8 +16,8 @@
  * the License.
  */
 
-#ifndef HELENA_HX_LIMITS_H
-#define HELENA_HX_LIMITS_H
+#ifndef HX_LIMITS_H
+#define HX_LIMITS_H
 
 #ifndef MAX_PATH
 #if __linux__
@@ -30,4 +30,4 @@
 #endif
 #endif // MAX_PATH
 
-#endif //HELENA_HX_LIMITS_H
+#endif // HX_LIMITS_H
