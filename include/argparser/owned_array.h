@@ -16,8 +16,8 @@
  * the License.
  */
 
-#ifndef OWNED_ARRAY_H
-#define OWNED_ARRAY_H
+#ifndef ARGPARSER_OWNED_ARRAY_H
+#define ARGPARSER_OWNED_ARRAY_H
 
 /**
  * An owned array is a dynamic (i.e., growable) collection that owns the
