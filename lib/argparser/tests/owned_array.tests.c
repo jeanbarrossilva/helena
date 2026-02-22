@@ -19,7 +19,7 @@
 #include <check.h>
 #include <stdlib.h>
 
-#include "owned_array.h"
+#include "../include/argparser/owned_array.h"
 
 START_TEST(initializes) {
   OwnedArray *array = malloc(sizeof(OwnedArray));

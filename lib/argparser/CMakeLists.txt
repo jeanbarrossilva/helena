@@ -16,8 +16,6 @@ specific language governing permissions and limitations under the License.
 ]]
 
 cmake_minimum_required(VERSION 4.0.2)
-
-include(HelenaTestPlan)
-
-add_library(helenaLexerTests lexer.tests.c)
-target_link_libraries(helenaLexerTests PRIVATE helenaLexer)
+add_library(argparser src/argparser.c src/owned_array.c)
+target_include_directories(argparser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(argparser PRIVATE hx)

@@ -71,4 +71,4 @@ void owned_array_append(OwnedArray *array, void *element);
  */
 void owned_array_copy(OwnedArray *array, void *destination, int index);
 
-#endif // OWNED_ARRAY_H
+#endif

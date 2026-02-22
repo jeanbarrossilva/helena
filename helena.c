@@ -16,13 +16,12 @@
  * the License.
  */
 
+#include <argparser.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <hx/limits.h>
 #include <hx/string.h>
-
-#include "tooling/argparser/argparser.h"
 
 void helena_describe() {
   const Subcommand subcommands[] = {{"build", "Builds Helena from source."}};

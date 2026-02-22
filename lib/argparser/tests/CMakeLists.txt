@@ -19,5 +19,5 @@ cmake_minimum_required(VERSION 4.0.2)
 
 include(HelenaTestPlan)
 
-add_library(helenaLexerTests lexer.tests.c)
-target_link_libraries(helenaLexerTests PRIVATE helenaLexer)
+add_library(argparserTests owned_array.tests.c)
+target_link_libraries(argparserTests PRIVATE argparser)

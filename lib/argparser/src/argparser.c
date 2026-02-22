@@ -17,12 +17,14 @@
  */
 
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <hx/string.h>
 
-#include "argparser.h"
-#include "owned_array.h"
+#include "../include/argparser.h"
+#include "../include/argparser/owned_array.h"
 
 static OwnedArray *descriptions = NULL;
 static const int default_option_count = 1;
@@ -85,7 +87,7 @@ static void run_default_for_option_at_index(const Description description,
 }
 
 static int argparser_getopt(const int argc,
-                            char * const *argv,
+                            char *const *argv,
                             const int option_count,
                             const Option *options) {
   struct option *gnu_options = malloc(sizeof(struct option) * option_count);
@@ -95,9 +97,10 @@ static int argparser_getopt(const int argc,
     Option argparser_option = options[index];
     gnu_options[index] = option_to_gnu(argparser_option);
     if (optstring == NULL) {
-      optstring = strcpy(optstring, &argparser_option.short_name);
+      optstring = malloc(sizeof(char) * option_count + sizeof(char));
+      strcpy(optstring, &argparser_option.short_name);
     } else {
-      strcat(optstring, &argparser_option.short_name);
+      hx_strcat(optstring, sizeof(optstring), &argparser_option.short_name, SEQUENTIAL);
     }
   }
   free(gnu_options);
