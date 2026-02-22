@@ -16,11 +16,6 @@ specific language governing permissions and limitations under the License.
 ]]
 
 cmake_minimum_required(VERSION 4.0.2)
-project(Helena LANGUAGES C)
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/configuration)
-add_subdirectory(lib/argparser)
-add_subdirectory(lib/hx)
-add_subdirectory(lib/lexer)
-add_executable(helena helena.c)
-target_link_libraries(helena PRIVATE argparser hx)
+add_library(argparser src/argparser.c src/owned_array.c)
+target_include_directories(argparser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(argparser PRIVATE hx)

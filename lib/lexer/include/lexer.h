@@ -82,4 +82,4 @@ void init_token(Token *token, size_t column, size_t row, const char *text);
  */
 bool is_id(const Token *token);
 
-#endif // LEXER_H
+#endif

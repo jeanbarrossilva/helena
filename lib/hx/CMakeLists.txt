@@ -15,7 +15,6 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-include(HelenaTestPlan)
-
-add_library(helenaLexerTests lexer.tests.c)
-target_link_libraries(helenaLexerTests PRIVATE helenaLexer)
+cmake_minimum_required(VERSION 4.0.2)
+add_library(hx src/string.c)
+target_include_directories(hx PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

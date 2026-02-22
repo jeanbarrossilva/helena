@@ -16,16 +16,8 @@
  * the License.
  */
 
-#pragma once
-
-#include <stdbool.h>
-
-/*
- * argparser is a utility which facilitates argument parsing, allowing for
- * documenting the caller program itself and its options and subcommands, while
- * providing default behaviors for common Unix command-line programs (such as
- * assisting the user on its usage when given a help option).
- */
+#ifndef ARGPARSER_H
+#define ARGPARSER_H
 
 /**
  * Configuration which modifies the behavior of the caller program. They are
@@ -167,3 +159,5 @@ const char *subcommand(int argc, char **argv);
  * result in a failure.
  */
 DefaultExecutionStatus execute_default(int argc, char **argv);
+
+#endif
