@@ -17,5 +17,5 @@ specific language governing permissions and limitations under the License.
 
 cmake_minimum_required(VERSION 4.0.2)
 add_library(helenaLexer src/lexer.c)
-target_include_directories(helenaLexer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(helenaLexer PUBLIC ${CMAKE_SOURCE_DIR}/include)
 add_subdirectory(tests)

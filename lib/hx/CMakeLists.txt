@@ -17,4 +17,4 @@ specific language governing permissions and limitations under the License.
 
 cmake_minimum_required(VERSION 4.0.2)
 add_library(hx src/string.c)
-target_include_directories(hx PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(hx PUBLIC ${CMAKE_SOURCE_DIR}/include)
