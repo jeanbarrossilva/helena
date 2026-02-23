@@ -24,3 +24,8 @@ add_subdirectory(lib/hx)
 add_subdirectory(lib/lexer)
 add_executable(helena helena.c)
 target_link_libraries(helena PRIVATE argparser hx)
+
+option(IS_TESTING_ENABLED "Enable testing?" ON)
+if(IS_TESTING_ENABLED)
+  enable_testing()
+endif()

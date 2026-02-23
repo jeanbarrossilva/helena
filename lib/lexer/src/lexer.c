@@ -19,7 +19,7 @@
 #include <ctype.h>
 #include <strings.h>
 
-#include "lexer.h"
+#include "../../../include/lexer.h"
 
 void init_token(Token *token,
                 const size_t column,

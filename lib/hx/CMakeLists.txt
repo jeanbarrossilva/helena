@@ -15,6 +15,5 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-cmake_minimum_required(VERSION 4.0.2)
 add_library(hx src/string.c)
 target_include_directories(hx PUBLIC ${CMAKE_SOURCE_DIR}/include)

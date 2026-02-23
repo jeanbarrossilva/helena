@@ -19,6 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int main(void) {
+  return 0;
+}
+
 START_TEST(token_with_only_a_digit_is_not_an_id) {
   for (int prefix = 0; prefix <= 8; prefix++) {
     char* text;
