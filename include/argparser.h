@@ -31,7 +31,7 @@ struct Option {
    * given in the call to the caller program. By definition, this name should
    * contain more characters than the short one.
    */
-  const char *long_name;
+  const char* long_name;
 
   /**
    * Abbreviation of the long name of this option to be preceded by a single
@@ -44,7 +44,7 @@ struct Option {
    * Detailed explanation of all or most relevant consequences of specifying
    * this option in the call to the caller program.
    */
-  const char *documentation;
+  const char* documentation;
 } typedef Option;
 
 /**
@@ -58,31 +58,31 @@ struct Subcommand {
    * program (if any); usually, describes what this subcommand does as a verb
    * (e.g., "build").
    */
-  const char *name;
+  const char* name;
 
   /** Detailed explanation of what this subcommand does. */
-  const char *documentation;
+  const char* documentation;
 } typedef Subcommand;
 
 /** Characteristics of a program using argparser. */
 struct Description {
   /** Name of the caller program. */
-  const char *name;
+  const char* name;
 
   /** Detailed explanation of the purpose of the caller program. */
-  const char *overview;
+  const char* overview;
 
   /** Amount of options. */
   int option_count;
 
   /** Options acceptable by the caller program. */
-  const Option *options;
+  const Option* options;
 
   /** Amount of subcommands. */
   int subcommand_count;
 
   /** Subcommands available from the caller program. */
-  const Subcommand *subcommands;
+  const Subcommand* subcommands;
 } typedef Description;
 
 /**
@@ -127,12 +127,12 @@ enum DefaultExecutionStatus {
  * @param subcommand_count Amount of subcommands.
  * @param subcommands Subcommands available from the caller program.
  */
-void describe(const char *name,
-              const char *overview,
+void describe(const char* name,
+              const char* overview,
               int option_count,
-              const Option *options,
+              const Option* options,
               int subcommand_count,
-              const Subcommand *subcommands);
+              const Subcommand* subcommands);
 
 /**
  * Retrieves the immediate subcommand specified in the call to the caller
@@ -148,7 +148,7 @@ void describe(const char *name,
  * @param argv Arguments passed into the caller program.
  * @return
  */
-const char *subcommand(int argc, char **argv);
+const char* subcommand(int argc, char** argv);
 
 /**
  * Executes the given call to the caller program in case it is given a
@@ -158,6 +158,6 @@ const char *subcommand(int argc, char **argv);
  * false. Calling this function without having configured the caller program may
  * result in a failure.
  */
-DefaultExecutionStatus execute_default(int argc, char **argv);
+DefaultExecutionStatus execute_default(int argc, char** argv);
 
-#endif // !ARGPARSER_H
+#endif  // !ARGPARSER_H

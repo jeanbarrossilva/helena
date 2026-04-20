@@ -51,7 +51,7 @@ struct Token {
    * from external input, this text may be that of an invalid token. The
    * responsibility of checking such validity is imposed on the lexer.
    */
-  const char *text;
+  const char* text;
 } typedef Token;
 
 /**
@@ -68,7 +68,7 @@ struct Token {
  * may come from external input, this text may be that of an invalid token. The
  * responsibility of checking such validity is imposed on the lexer.
  */
-void init_token(Token *token, size_t column, size_t row, const char *text);
+void init_token(Token* token, size_t column, size_t row, const char* text);
 
 /* === PREDEFINED TOKENS === */
 
@@ -80,6 +80,6 @@ void init_token(Token *token, size_t column, size_t row, const char *text);
  *
  * @param token The token to check whether it is an identifier.
  */
-bool is_id(const Token *token);
+bool is_id(const Token* token);
 
-#endif // !LEXER_H
+#endif  // !LEXER_H

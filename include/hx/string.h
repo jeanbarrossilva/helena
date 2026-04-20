@@ -113,9 +113,9 @@ typedef enum {
  * @param strategy Determines whether the concatenation must result in the
  * destination being exactly filled; or if truncation is allowed; etc.
  */
-size_t hx_strcat(char *destination,
+size_t hx_strcat(char* destination,
                  size_t destination_size,
-                 const char *source,
+                 const char* source,
                  ConcatenationStrategy strategy);
 
-#endif // !HX_STRINGS_H
+#endif  // !HX_STRINGS_H

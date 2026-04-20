@@ -33,7 +33,7 @@
  * argparser.
  */
 struct OwnedArray {
-  void *head;
+  void* head;
   int capacity;
   int element_size;
   int count;
@@ -45,7 +45,7 @@ struct OwnedArray {
  * @param array Pointer to the memory allocated for the array.
  * @param element_size Size of an element of the array in bytes.
  */
-void owned_array_init(OwnedArray *array, int element_size);
+void owned_array_init(OwnedArray* array, int element_size);
 
 /**
  * Moves an element from its current address to that at the end of the array.
@@ -58,7 +58,7 @@ void owned_array_init(OwnedArray *array, int element_size);
  * @param array Pointer to the memory allocated to the initialized array.
  * @param element Element to be appended.
  */
-void owned_array_append(OwnedArray *array, void *element);
+void owned_array_append(OwnedArray* array, void* element);
 
 /**
  * Copies the element at the given index in the array.
@@ -69,6 +69,6 @@ void owned_array_append(OwnedArray *array, void *element);
  * will have its value unchanged.
  * @param index Index of the element to be copied in the array.
  */
-void owned_array_copy(OwnedArray *array, void *destination, int index);
+void owned_array_copy(OwnedArray* array, void* destination, int index);
 
-#endif // !ARGPARSER_OWNED_ARRAY_H
+#endif  // !ARGPARSER_OWNED_ARRAY_H

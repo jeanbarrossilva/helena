@@ -17,21 +17,18 @@
  */
 
 #include <argparser.h>
+#include <hx/limits.h>
+#include <hx/string.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <hx/limits.h>
-#include <hx/string.h>
 
 void helena_describe() {
   const Subcommand subcommands[] = {{"build", "Builds Helena from source."}};
   describe("helena",
            "Builds the Helena language from its source or executes one of the "
            "phases of the compilation process.",
-           0,
-           NULL,
-           1,
-           subcommands);
+           0, NULL, 1, subcommands);
 }
 
 static void build() {
@@ -42,14 +39,15 @@ static void build() {
   execl("/opt/homebrew/bin/cmake", "cmake --build %s", directory, NULL);
 }
 
-int main(const int argc, char **argv) {
+int main(const int argc, char** argv) {
   helena_describe();
   switch (execute_default(argc, argv)) {
-    case EXECUTED: return 0;
+    case EXECUTED:    return 0;
     case UNDESCRIBED: exit(1);
-    case NONE: ;
+    case NONE:        ;
   }
-  if (!strcmp(subcommand(argc, argv), "build")) return 0;
+  if (!strcmp(subcommand(argc, argv), "build"))
+    return 0;
   build();
   return 0;
 }

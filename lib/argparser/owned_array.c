@@ -21,32 +21,35 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void grow_on_overflow(OwnedArray *array, const int new_count) {
-  if (new_count <= array->capacity) return;
+static void grow_on_overflow(OwnedArray* array, const int new_count) {
+  if (new_count <= array->capacity)
+    return;
   array->capacity = (array->capacity == 0) ? 4 : array->capacity * 2;
 }
 
-void owned_array_init(OwnedArray *array, const int element_size) {
-  if (array == NULL) return;
-  array->head = NULL;
-  array->capacity = 0;
+void owned_array_init(OwnedArray* array, const int element_size) {
+  if (array == NULL)
+    return;
+  array->head         = NULL;
+  array->capacity     = 0;
   array->element_size = element_size;
-  array->count = 0;
+  array->count        = 0;
 }
 
-void owned_array_append(OwnedArray *array, void *element) {
+void owned_array_append(OwnedArray* array, void* element) {
   const int new_count = array->count + 1;
   grow_on_overflow(array, new_count);
-  array->head = realloc(array->head, new_count);
-  char *offset = (char *) array->head + new_count * array->element_size;
+  array->head  = realloc(array->head, new_count);
+  char* offset = (char*)array->head + new_count * array->element_size;
   memmove(offset, element, array->element_size);
   free(element);
   array->count = new_count;
 }
 
-void owned_array_copy(OwnedArray *array, void *destination, const int index) {
-  const bool is_out_of_range = array->count == 0 || index < 0 || index > array->
-                               count - 1;
-  if (is_out_of_range) return;
+void owned_array_copy(OwnedArray* array, void* destination, const int index) {
+  const bool is_out_of_range =
+      array->count == 0 || index < 0 || index > array->count - 1;
+  if (is_out_of_range)
+    return;
   memcpy(destination, &array->head[index], array->element_size);
 }

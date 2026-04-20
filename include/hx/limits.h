@@ -28,6 +28,6 @@
 #include <sys/syslimits.h>
 #define MAX_PATH PATH_MAX
 #endif
-#endif // !MAX_PATH
+#endif  // !MAX_PATH
 
-#endif // !HX_LIMITS_H
+#endif  // !HX_LIMITS_H

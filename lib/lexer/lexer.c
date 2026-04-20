@@ -20,23 +20,25 @@
 #include <lexer.h>
 #include <strings.h>
 
-void init_token(Token *token,
+void init_token(Token* token,
                 const size_t column,
                 const size_t row,
-                const char *text) {
-  if (token == NULL) return;
+                const char* text) {
+  if (token == NULL)
+    return;
   token->column = column;
-  token->row = row;
-  token->text = text;
+  token->row    = row;
+  token->text   = text;
 }
 
 /* === PREDEFINED TOKENS === */
 
-bool is_id(const Token *token) {
-  const char *text = token->text;
+bool is_id(const Token* token) {
+  const char* text = token->text;
   for (int index = 0; index < strlen(text); index++) {
     const char character = text[index];
-    if (index == 0 && isalpha(character) || isalnum(character)) continue;
+    if (index == 0 && isalpha(character) || isalnum(character))
+      continue;
     return false;
   }
   return true;

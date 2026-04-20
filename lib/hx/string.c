@@ -21,22 +21,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-size_t hx_strcat(char *destination,
+size_t hx_strcat(char* destination,
                  const size_t destination_size,
-                 const char *source,
+                 const char* source,
                  const ConcatenationStrategy strategy) {
   const size_t source_length = strlen(source);
-  if (source_length == 0) return 0;
+  if (source_length == 0)
+    return 0;
   size_t destination_length;
   const size_t source_size = source_length + sizeof(char);
-  if (strategy != TRUNCATE && destination_size < (
-        destination_length = strlen(destination)) + source_size) {
+  if (strategy != TRUNCATE &&
+      destination_size <
+          (destination_length = strlen(destination)) + source_size) {
     fprintf(stderr,
             "hx_strcat(): \"%s\" does not fit into the %lu byte(s) allocated "
             "for \"%s\" (off by %lu byte(s)).",
-            source,
-            source_size,
-            destination,
+            source, source_size, destination,
             destination_size - destination_length + source_length);
     exit(ENAMETOOLONG);
   }
@@ -46,7 +46,7 @@ size_t hx_strcat(char *destination,
 #if defined(__OpenBSD__) || defined(__APPLE__)
   return strlcat(destination, source, destination_size);
 #else
-  destination_length = strlen(destination);
+  destination_length      = strlen(destination);
   int concatenation_index = destination_length + sizeof(char);
   strcpy(&destination[concatenation_index], source);
   return destination_length + source_length + sizeof(char);
