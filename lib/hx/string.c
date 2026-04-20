@@ -17,10 +17,9 @@
  */
 
 #include <errno.h>
+#include <hx/string.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "../include/hx/string.h"
 
 size_t hx_strcat(char *destination,
                  const size_t destination_size,
@@ -33,7 +32,8 @@ size_t hx_strcat(char *destination,
   if (strategy != TRUNCATE && destination_size < (
         destination_length = strlen(destination)) + source_size) {
     fprintf(stderr,
-            "hx_strcat(): \"%s\" does not fit into the %lu byte(s) allocated for \"%s\" (off by %lu byte(s)).",
+            "hx_strcat(): \"%s\" does not fit into the %lu byte(s) allocated "
+            "for \"%s\" (off by %lu byte(s)).",
             source,
             source_size,
             destination,

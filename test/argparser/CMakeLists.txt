@@ -15,9 +15,9 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-cmake_minimum_required(VERSION 4.0.2)
-
 include(HelenaTestPlan)
 
-add_library(helenaLexerTests lexer.tests.c)
-target_link_libraries(helenaLexerTests PRIVATE helenaLexer)
+add_executable(argparserTests owned_array.tests.cpp)
+set_up_testing(argparserTests)
+target_link_libraries(argparserTests PRIVATE argparser)
+add_test(NAME argparserTests COMMAND argparserTests)

@@ -16,37 +16,40 @@
  * the License.
  */
 
-#include <check.h>
-#include <stdlib.h>
-
-#include "../include/argparser/owned_array.h"
-
-START_TEST(initializes) {
-  OwnedArray *array = malloc(sizeof(OwnedArray));
-  owned_array_init(array, sizeof(int));
-  ck_assert(array->head == NULL);
-  ck_assert(array->capacity == 0);
-  ck_assert(array->element_size == sizeof(int));
-  ck_assert(array->count == 0);
+extern "C" {
+  #include <argparser/owned_array.h>
 }
-END_TEST
 
-START_TEST(appends) {
-  OwnedArray *array = malloc(sizeof(OwnedArray));
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include <cstdlib>
+#include <doctest.hpp>
+
+using namespace std;
+
+TEST_CASE("Initializes") {
+  OwnedArray *array = (OwnedArray *) malloc(sizeof(OwnedArray));
+  owned_array_init(array, sizeof(int));
+  CHECK(array->head == NULL);
+  CHECK(array->capacity == 0);
+  CHECK(array->element_size == sizeof(int));
+  CHECK(array->count == 0);
+}
+
+TEST_CASE("Appends") {
+  OwnedArray *array = (OwnedArray *) malloc(sizeof(OwnedArray));
   int element = 2;
   owned_array_init(array, sizeof(int));
   owned_array_append(array, &element);
-  ck_assert(((int *) array->head)[0] == 2);
+  CHECK(((int *) array->head)[0] == 2);
 }
-END_TEST
 
-START_TEST(copies) {
-  OwnedArray *array = malloc(sizeof(OwnedArray));
+TEST_CASE("Copies") {
+  OwnedArray *array = (OwnedArray *) malloc(sizeof(OwnedArray));
   int element = 2;
   owned_array_init(array, sizeof(int));
   owned_array_append(array, &element);
   owned_array_copy(array, 0, element);
-  ck_assert(element == 2);
-  ck_assert(((int *) array->head)[0] == 2);
+  CHECK(element == 2);
+  CHECK(((int *) array->head)[0] == 2);
 }
-END_TEST

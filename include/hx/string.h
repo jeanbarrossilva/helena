@@ -28,7 +28,7 @@
  * often caused by calls to strcat() or concatenations with an insufficient size
  * to fill the destination by calls to strncat().
  */
-enum ConcatenationStrategy {
+typedef enum {
   /**
    * Concatenating the destination and the source must result in the destination
    * being completely filled, with one and only null byte, by which it is
@@ -58,7 +58,7 @@ enum ConcatenationStrategy {
    * instead.
    */
   SEQUENTIAL
-} typedef ConcatenationStrategy;
+} ConcatenationStrategy;
 
 /**
  * Appends one string to another.
@@ -118,4 +118,4 @@ size_t hx_strcat(char *destination,
                  const char *source,
                  ConcatenationStrategy strategy);
 
-#endif
+#endif // !HX_STRINGS_H

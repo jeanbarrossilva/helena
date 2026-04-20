@@ -15,19 +15,13 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-function(link_testing_library)
-  find_package(PkgConfig)
-  if(NOT PKG_CONFIG_FOUND)
-    message(FATAL_ERROR
-            "pkg-config is required for retrieving test dependencies but is not
-            installed."
-    )
-    return()
-  endif()
-  pkg_check_modules(CHECK REQUIRED check)
-  include_directories(${CHECK_INCLUDE_DIRS})
-  link_directories(${CHECK_LIBRARY_DIRS})
-  add_definitions(${CHECK_CFLAGS_OTHER})
-endfunction()
+include(HelenaLibrary)
 
-link_testing_library()
+# Performs configuration common to every testing library of Helena, including
+# both internal and external dependencies for production code; and ones specific
+# for testing, such as the doctest framework.
+function(set_up_testing target_name)
+  set_up_library(${target_name})
+  target_include_directories(${target_name} PRIVATE
+    ${CMAKE_SOURCE_DIR}/external/testing)
+endfunction()

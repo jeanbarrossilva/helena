@@ -16,15 +16,14 @@
  * the License.
  */
 
+#include <argparser/owned_array.h>
+#include <argparser.h>
 #include <getopt.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <hx/string.h>
-
-#include "../include/argparser.h"
-#include "../include/argparser/owned_array.h"
 
 static OwnedArray *descriptions = NULL;
 static const int default_option_count = 1;

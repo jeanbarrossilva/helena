@@ -16,11 +16,10 @@
  * the License.
  */
 
+#include <argparser/owned_array.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "../include/argparser/owned_array.h"
 
 static void grow_on_overflow(OwnedArray *array, const int new_count) {
   if (new_count <= array->capacity) return;
