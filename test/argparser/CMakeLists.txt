@@ -17,5 +17,7 @@ specific language governing permissions and limitations under the License.
 
 include(HelenaTestPlan)
 
-add_library(argparserTests owned_array.tests.c)
+add_executable(argparserTests owned_array.tests.cpp)
+set_up_testing(argparserTests)
 target_link_libraries(argparserTests PRIVATE argparser)
+add_test(NAME argparserTests COMMAND argparserTests)

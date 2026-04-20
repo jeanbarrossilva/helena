@@ -15,9 +15,9 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-include(HelenaTestPlan)
-
-add_executable(helenaLexerTests lexer.tests.cpp)
-set_up_testing(helenaLexerTests)
-target_link_libraries(helenaLexerTests PRIVATE helenaLexer)
-add_test(NAME helenaLexerTests COMMAND helenaLexerTests)
+# Performs configuration common to all libraries of Helena. One of the steps
+# involved is defining the directories included into the specified target; these
+# directories contain dependencies belonging to Deus and external ones.
+function(set_up_library target_name)
+  target_include_directories(${target_name} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+endfunction()

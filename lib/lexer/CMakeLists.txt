@@ -15,5 +15,7 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-add_library(helenaLexer src/lexer.c)
-target_include_directories(helenaLexer PUBLIC ${CMAKE_SOURCE_DIR}/include)
+include(HelenaLibrary)
+
+add_library(helenaLexer lexer.c)
+set_up_library(helenaLexer)

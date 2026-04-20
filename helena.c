@@ -26,7 +26,8 @@
 void helena_describe() {
   const Subcommand subcommands[] = {{"build", "Builds Helena from source."}};
   describe("helena",
-           "Builds the Helena language from its source or executes one of the phases of the compilation process.",
+           "Builds the Helena language from its source or executes one of the "
+           "phases of the compilation process.",
            0,
            NULL,
            1,

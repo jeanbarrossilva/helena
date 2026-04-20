@@ -15,8 +15,5 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-if(NOT IS_TESTING_ENABLED)
-  return()
-endif()
-
+add_subdirectory(argparser)
 add_subdirectory(lexer)

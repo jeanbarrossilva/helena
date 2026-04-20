@@ -16,7 +16,11 @@ specific language governing permissions and limitations under the License.
 ]]
 
 cmake_minimum_required(VERSION 4.0.2)
-project(Helena LANGUAGES C)
+project(Helena LANGUAGES C CXX)
+set(C_STANDARD 23)
+set(CXX_STANDARD 23)
+
+include(CTest)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/configuration)
 add_subdirectory(lib/argparser)
@@ -25,7 +29,6 @@ add_subdirectory(lib/lexer)
 add_executable(helena helena.c)
 target_link_libraries(helena PRIVATE argparser hx)
 
-option(IS_TESTING_ENABLED "Enable testing?" ON)
-if(IS_TESTING_ENABLED)
-  enable_testing()
+if(BUILD_TESTING)
+  add_subdirectory(test)
 endif()

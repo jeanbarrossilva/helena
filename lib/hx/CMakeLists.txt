@@ -15,5 +15,7 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-add_library(hx src/string.c)
-target_include_directories(hx PUBLIC ${CMAKE_SOURCE_DIR}/include)
+include(HelenaLibrary)
+
+add_library(hx string.c)
+set_up_library(hx)

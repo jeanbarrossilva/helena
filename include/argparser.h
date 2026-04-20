@@ -160,4 +160,4 @@ const char *subcommand(int argc, char **argv);
  */
 DefaultExecutionStatus execute_default(int argc, char **argv);
 
-#endif
+#endif // !ARGPARSER_H
