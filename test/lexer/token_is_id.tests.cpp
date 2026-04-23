@@ -20,8 +20,6 @@ extern "C" {
 #include <lexer/lexer.h>
 }
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-
 #include <doctest.hpp>
 
 TEST_CASE("Token with only a digit is not an ID") {
@@ -30,7 +28,7 @@ TEST_CASE("Token with only a digit is not an ID") {
   CHECK(asprintf(&text, "%d", prefix));
   Token* token = (Token*)malloc(sizeof(Token));
   init_token(token, 0, 0, text);
-  CHECK(!is_id(token));
+  CHECK(!token_is_id(token));
   free(token);
 }
 
@@ -40,27 +38,27 @@ TEST_CASE("Token prefixed by a digit and followed by letters is not an ID") {
   CHECK(asprintf(&text, "%dID", prefix));
   Token* token = (Token*)malloc(sizeof(Token));
   init_token(token, 0, 0, text);
-  CHECK(!is_id(token));
+  CHECK(!token_is_id(token));
   free(token);
 }
 
 TEST_CASE("Token with only a letter is an ID") {
   Token* token = (Token*)malloc(sizeof(Token));
   init_token(token, 0, 0, "h");
-  CHECK(is_id(token));
+  CHECK(token_is_id(token));
   free(token);
 }
 
 TEST_CASE("Token with only letters is an ID") {
   Token* token = (Token*)malloc(sizeof(Token));
   init_token(token, 0, 0, "helena");
-  CHECK(is_id(token));
+  CHECK(token_is_id(token));
   free(token);
 }
 
 TEST_CASE("Token prefixed by a letter and followed by digits is an ID") {
   Token* token = (Token*)malloc(sizeof(Token));
   init_token(token, 0, 0, "h06");
-  CHECK(is_id(token));
+  CHECK(token_is_id(token));
   free(token);
 }

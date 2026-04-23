@@ -17,7 +17,14 @@ specific language governing permissions and limitations under the License.
 
 include(HelenaTestPlan)
 
-add_executable(helenaLexerTests lexer.tests.cpp)
+add_executable(helenaLexerTests
+  configuration.cpp
+  strrand.c
+  strrand.tests.cpp
+  token_is_attributor.tests.cpp
+  token_is_id.tests.cpp)
 set_up_testing(helenaLexerTests)
+target_include_directories(helenaLexerTests PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(helenaLexerTests PRIVATE helenaLexer)
 add_test(NAME helenaLexerTests COMMAND helenaLexerTests)

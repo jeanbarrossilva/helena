@@ -16,31 +16,22 @@
  * the License.
  */
 
-#include <ctype.h>
-#include <lexer/lexer.h>
-#include <strings.h>
+#include <stdlib.h>
+#include <strrand.h>
 
-void init_token(Token* token,
-                const size_t column,
-                const size_t row,
-                const char* text) {
-  if (token == NULL)
-    return;
-  token->column = column;
-  token->row    = row;
-  token->text   = text;
-}
+/** Inclusive range of printable ASCII characters. */
+static const char RANGE[2] = {32, 126};
 
-bool token_is_attributor(const Token* token) {
-  return strlen(token->text) == 1 && token->text[0] == '=';
-}
-
-bool token_is_id(const Token* token) {
-  const char* text = token->text;
-  for (int index = 0; index < strlen(text); index++) {
-    const char character = text[index];
-    if (index == 0 && isnumber(character) || !isalnum(character))
-      return false;
-  }
-  return true;
+/**
+ * Generates a null-terminated random string composed by printable ASCII
+ * characters.
+ *
+ * @param string Pointer to the string.
+ * @param length Amount of characters which can be put into the string,
+ * disregarding the null character '\0' at length + 1.
+ */
+void strrand(char* string, size_t length) {
+  for (int index = 0; index < length; index++)
+    string[index] = (char)(rand() % (RANGE[1] - RANGE[0])) + RANGE[0];
+  string[length] = '\0';
 }

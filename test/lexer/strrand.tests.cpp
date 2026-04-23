@@ -16,31 +16,16 @@
  * the License.
  */
 
-#include <ctype.h>
-#include <lexer/lexer.h>
-#include <strings.h>
-
-void init_token(Token* token,
-                const size_t column,
-                const size_t row,
-                const char* text) {
-  if (token == NULL)
-    return;
-  token->column = column;
-  token->row    = row;
-  token->text   = text;
+extern "C" {
+#include <strrand.h>
 }
 
-bool token_is_attributor(const Token* token) {
-  return strlen(token->text) == 1 && token->text[0] == '=';
-}
+#include <doctest.hpp>
 
-bool token_is_id(const Token* token) {
-  const char* text = token->text;
-  for (int index = 0; index < strlen(text); index++) {
-    const char character = text[index];
-    if (index == 0 && isnumber(character) || !isalnum(character))
-      return false;
-  }
-  return true;
+TEST_CASE("Generates random string") {
+  char* str1 = (char*)malloc(65 * sizeof(char));
+  strrand(str1, 64);
+  char* str2 = (char*)malloc(65 * sizeof(char));
+  strrand(str2, 64);
+  CHECK(strcmp(str1, str2));
 }

@@ -71,6 +71,16 @@ struct Token {
 void init_token(Token* token, size_t column, size_t row, const char* text);
 
 /**
+ * Determines whether the given token is an = (equals sign), denoting an
+ * attribution of the result of evaluating an expression to some variable.
+ * Attributors may be separated from the name of the variable and the expression
+ * by whitespaces.
+ *
+ * @param token The token to check whether it is an attributor.
+ */
+ bool token_is_attributor(const Token *token);
+
+/**
  * Determines whether the given token is an identifier. In Helena, an
  * identifier is considered to be any sequence of non-whitespace characters in C
  * encoding containing at least one character, with a letter as the first
@@ -78,6 +88,6 @@ void init_token(Token* token, size_t column, size_t row, const char* text);
  *
  * @param token The token to check whether it is an identifier.
  */
-bool is_id(const Token* token);
+bool token_is_id(const Token* token);
 
 #endif  // !LEXER_H

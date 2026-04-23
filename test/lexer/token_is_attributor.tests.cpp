@@ -16,31 +16,29 @@
  * the License.
  */
 
-#include <ctype.h>
+extern "C" {
 #include <lexer/lexer.h>
-#include <strings.h>
 
-void init_token(Token* token,
-                const size_t column,
-                const size_t row,
-                const char* text) {
-  if (token == NULL)
-    return;
-  token->column = column;
-  token->row    = row;
-  token->text   = text;
+#include <strrand.h>
 }
 
-bool token_is_attributor(const Token* token) {
-  return strlen(token->text) == 1 && token->text[0] == '=';
+#include <doctest.hpp>
+
+TEST_CASE("Equals sign is an attributor") {
+  Token* token = (Token*)malloc(sizeof(Token));
+  init_token(token, 0, 0, "=");
+  CHECK(token_is_attributor(token));
+  free(token);
 }
 
-bool token_is_id(const Token* token) {
-  const char* text = token->text;
-  for (int index = 0; index < strlen(text); index++) {
-    const char character = text[index];
-    if (index == 0 && isnumber(character) || !isalnum(character))
-      return false;
+TEST_CASE("Non-equals-sign is not an attributor") {
+  for (int index = 0; index < 65; index++) {
+    Token* token = (Token*)malloc(sizeof(Token));
+    char* text   = (char*)malloc(9 * sizeof(char));
+    strrand(text, 8);
+    init_token(token, 0, 0, text);
+    CHECK(!token_is_attributor(token));
+    free(token);
+    free(text);
   }
-  return true;
 }
