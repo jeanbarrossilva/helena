@@ -17,7 +17,7 @@
  */
 
 extern "C" {
-  #include <argparser/owned_array.h>
+#include <argparser/owned_array.h>
 }
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -28,7 +28,7 @@ extern "C" {
 using namespace std;
 
 TEST_CASE("Initializes") {
-  OwnedArray *array = (OwnedArray *) malloc(sizeof(OwnedArray));
+  OwnedArray* array = (OwnedArray*)malloc(sizeof(OwnedArray));
   owned_array_init(array, sizeof(int));
   CHECK(array->head == NULL);
   CHECK(array->capacity == 0);
@@ -37,19 +37,19 @@ TEST_CASE("Initializes") {
 }
 
 TEST_CASE("Appends") {
-  OwnedArray *array = (OwnedArray *) malloc(sizeof(OwnedArray));
-  int element = 2;
+  OwnedArray* array = (OwnedArray*)malloc(sizeof(OwnedArray));
+  int element       = 2;
   owned_array_init(array, sizeof(int));
   owned_array_append(array, &element);
-  CHECK(((int *) array->head)[0] == 2);
+  CHECK(((int*)array->head)[0] == 2);
 }
 
 TEST_CASE("Copies") {
-  OwnedArray *array = (OwnedArray *) malloc(sizeof(OwnedArray));
-  int element = 2;
+  OwnedArray* array = (OwnedArray*)malloc(sizeof(OwnedArray));
+  int element       = 2;
   owned_array_init(array, sizeof(int));
   owned_array_append(array, &element);
   owned_array_copy(array, 0, element);
   CHECK(element == 2);
-  CHECK(((int *) array->head)[0] == 2);
+  CHECK(((int*)array->head)[0] == 2);
 }

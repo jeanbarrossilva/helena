@@ -28,27 +28,36 @@ size_t hx_strcat(char* destination,
   const size_t source_length = strlen(source);
   if (source_length == 0)
     return 0;
-  size_t destination_length;
-  const size_t source_size = source_length + sizeof(char);
-  if (strategy != TRUNCATE &&
-      destination_size <
-          (destination_length = strlen(destination)) + source_size) {
+  const size_t destination_length = strlen(destination);
+  size_t concatenation_length     = destination_length + source_length;
+  size_t concatenation_size       = concatenation_length + sizeof(char);
+  if (destination_size < concatenation_size) {
+    if (strategy == TRUNCATE) {
+      concatenation_length = destination_size - sizeof(char);
+      concatenation_size   = destination_size;
+    } else {
+      fprintf(stderr,
+              "hx_strcat(): last %zu character(s) of \"%s\" do not fit into "
+              "the %zu byte(s) allocated for \"%s\" (off by %zu byte(s)).\n",
+              source_length, source, destination_size, destination,
+              concatenation_size - destination_size);
+      exit(ENAMETOOLONG);
+      return 0;
+    }
+  }
+  if (strategy != SEQUENTIAL && destination_size > concatenation_size) {
     fprintf(stderr,
-            "hx_strcat(): \"%s\" does not fit into the %lu byte(s) allocated "
-            "for \"%s\" (off by %lu byte(s)).",
-            source, source_size, destination,
-            destination_size - destination_length + source_length);
-    exit(ENAMETOOLONG);
+            "hx_strcat(): the %zu characters of \"%s\" do not fill the %zu "
+            "byte(s) allocated for \"%s\" (remaining %zu byte(s)).\n",
+            source_length, source, destination_size, destination,
+            destination_size - concatenation_size);
+    exit(EINVAL);
+    return 0;
   }
-  if (strategy == SEQUENTIAL) {
-    return strncat(destination, source, destination_size) - destination;
-  }
-#if defined(__OpenBSD__) || defined(__APPLE__)
-  return strlcat(destination, source, destination_size);
+#if defined(__APPLE__) || defined(__MACH__) || defined(__OpenBSD__)
+  strlcat(destination, source, destination_size);
 #else
-  destination_length      = strlen(destination);
-  int concatenation_index = destination_length + sizeof(char);
-  strcpy(&destination[concatenation_index], source);
-  return destination_length + source_length + sizeof(char);
+  strncat(destination, source, destination_size);
 #endif
+  return concatenation_length;
 }

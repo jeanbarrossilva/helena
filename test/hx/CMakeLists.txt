@@ -15,6 +15,9 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 ]]
 
-add_subdirectory(argparser)
-add_subdirectory(hx)
-add_subdirectory(lexer)
+include(HelenaTestPlan)
+
+add_executable(hxTests string.tests.cpp)
+set_up_testing(hxTests)
+target_link_libraries(hxTests PRIVATE hx)
+add_test(NAME hxTests COMMAND hxTests)
