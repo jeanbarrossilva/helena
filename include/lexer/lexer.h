@@ -78,7 +78,7 @@ void init_token(Token* token, size_t column, size_t row, const char* text);
  *
  * @param token The token to check whether it is an attributor.
  */
- bool token_is_attributor(const Token *token);
+ bool token_is_attributor(const Token* token);
 
 /**
  * Determines whether the given token is an identifier. In Helena, an
@@ -96,6 +96,13 @@ bool token_is_id(const Token* token);
  *
  * @param token The token to check whether it is a "var" keyword.
  */
-bool token_is_var_keyword(const Token *token);
+bool token_is_var_keyword(const Token* token);
+
+/**
+ * Determines whether the given token is a whitespace (" "). Whitespaces may be
+ * inserted into the source for separating (separable) tokens from each other,
+ * and may be so consecutively.
+ */
+ bool token_is_whitespace(const Token* token);
 
 #endif  // !LEXER_H

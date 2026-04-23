@@ -21,9 +21,8 @@ add_executable(helenaLexerTests
   configuration.cpp
   strrand.c
   strrand.tests.cpp
-  token_is_attributor.tests.cpp
-  token_is_id.tests.cpp
-  token_is_var_keyword.tests.cpp)
+  token_general_checkers.tests.cpp
+  token_is_id.tests.cpp)
 set_up_testing(helenaLexerTests)
 target_include_directories(helenaLexerTests PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include)

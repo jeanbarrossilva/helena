@@ -46,5 +46,9 @@ bool token_is_id(const Token* token) {
 }
 
 bool token_is_var_keyword(const Token* token) {
-  return !strcmp(token->text, "var");
+  return strcmp(token->text, "var") == 0;
+}
+
+bool token_is_whitespace(const Token* token) {
+  return strcmp(token->text, " ") == 0;
 }
