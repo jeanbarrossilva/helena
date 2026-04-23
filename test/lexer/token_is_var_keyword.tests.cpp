@@ -23,21 +23,18 @@ extern "C" {
 
 #include <doctest.hpp>
 
-TEST_CASE("Equals sign is an attributor") {
+TEST_CASE("\"var\" is var keyword token") {
   Token* token = (Token*)malloc(sizeof(Token));
-  init_token(token, 0, 0, "=");
-  CHECK(token_is_attributor(token));
-  free(token);
+  init_token(token, 0, 0, "var");
+  CHECK(token_is_var_keyword(token));
 }
 
-TEST_CASE("Non-equals-sign is not an attributor") {
+TEST_CASE("Non-var-keyword-token is not a var keyword token") {
   for (int index = 0; index < 65; index++) {
     Token* token = (Token*)malloc(sizeof(Token));
     char* text   = (char*)malloc(9 * sizeof(char));
     strrand(text, 8);
     init_token(token, 0, 0, text);
-    CHECK(!token_is_attributor(token));
-    free(token);
-    free(text);
+    CHECK(!token_is_var_keyword(token));
   }
 }

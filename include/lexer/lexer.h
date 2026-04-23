@@ -90,4 +90,12 @@ void init_token(Token* token, size_t column, size_t row, const char* text);
  */
 bool token_is_id(const Token* token);
 
+/**
+ * Determines whether the given token is the keyword for beginning the
+ * declaration of a variable which can be reassigned, i.e., is mutable. 
+ *
+ * @param token The token to check whether it is a "var" keyword.
+ */
+bool token_is_var_keyword(const Token *token);
+
 #endif  // !LEXER_H

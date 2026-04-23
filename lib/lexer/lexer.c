@@ -44,3 +44,7 @@ bool token_is_id(const Token* token) {
   }
   return true;
 }
+
+bool token_is_var_keyword(const Token* token) {
+  return !strcmp(token->text, "var");
+}
