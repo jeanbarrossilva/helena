@@ -1,0 +1,5 @@
+#!/bin/bash
+
+current_directory="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+cmake -B build
+cmake --build build

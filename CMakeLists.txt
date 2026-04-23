@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 cmake_minimum_required(VERSION 4.0.2)
 project(Helena LANGUAGES C CXX)
 set(C_STANDARD 23)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CXX_STANDARD 23)
 
 include(CTest)

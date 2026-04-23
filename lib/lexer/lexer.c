@@ -16,6 +16,7 @@
  * the License.
  */
 
+#include <_ctype.h>
 #include <ctype.h>
 #include <lexer/lexer.h>
 #include <strings.h>
@@ -31,15 +32,12 @@ void init_token(Token* token,
   token->text   = text;
 }
 
-/* === PREDEFINED TOKENS === */
-
 bool is_id(const Token* token) {
   const char* text = token->text;
   for (int index = 0; index < strlen(text); index++) {
     const char character = text[index];
-    if (index == 0 && isalpha(character) || isalnum(character))
-      continue;
-    return false;
+    if (index == 0 && isnumber(character) || !isalnum(character))
+      return false;
   }
   return true;
 }

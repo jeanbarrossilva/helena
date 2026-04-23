@@ -25,25 +25,23 @@ extern "C" {
 #include <doctest.hpp>
 
 TEST_CASE("Token with only a digit is not an ID") {
-  for (int prefix = 0; prefix <= 8; prefix++) {
-    char* text;
-    CHECK(asprintf(&text, "%d", prefix));
-    Token* token = (Token*)malloc(sizeof(Token));
-    init_token(token, 0, 0, text);
-    CHECK(!is_id(token));
-    free(token);
-  }
+  int prefix = GENERATE(0, 1, 2, 3, 4, 5, 6, 7, 8);
+  char* text;
+  CHECK(asprintf(&text, "%d", prefix));
+  Token* token = (Token*)malloc(sizeof(Token));
+  init_token(token, 0, 0, text);
+  CHECK(!is_id(token));
+  free(token);
 }
 
-TEST_CASE("Token prefix by a digit and followed by letters is not an ID") {
-  for (int prefix = 0; prefix <= 8; prefix++) {
-    char* text;
-    CHECK(asprintf(&text, "%dID", prefix));
-    Token* token = (Token*)malloc(sizeof(Token));
-    init_token(token, 0, 0, text);
-    CHECK(!is_id(token));
-    free(token);
-  }
+TEST_CASE("Token prefixed by a digit and followed by letters is not an ID") {
+  int prefix = GENERATE(0, 1, 2, 3, 4, 5, 6, 7, 8);
+  char* text;
+  CHECK(asprintf(&text, "%dID", prefix));
+  Token* token = (Token*)malloc(sizeof(Token));
+  init_token(token, 0, 0, text);
+  CHECK(!is_id(token));
+  free(token);
 }
 
 TEST_CASE("Token with only a letter is an ID") {

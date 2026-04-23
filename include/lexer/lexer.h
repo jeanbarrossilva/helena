@@ -70,8 +70,6 @@ struct Token {
  */
 void init_token(Token* token, size_t column, size_t row, const char* text);
 
-/* === PREDEFINED TOKENS === */
-
 /**
  * Determines whether the given token is an identifier. In Helena, an
  * identifier is considered to be any sequence of non-whitespace characters in C
