@@ -17,7 +17,7 @@
  */
 
 extern "C" {
-#include <lexer.h>
+#include <lexer/lexer.h>
 }
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN

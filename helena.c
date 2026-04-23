@@ -16,7 +16,7 @@
  * the License.
  */
 
-#include <argparser.h>
+#include <argparser/argparser.h>
 #include <hx/limits.h>
 #include <hx/string.h>
 #include <stdlib.h>

@@ -17,7 +17,7 @@
  */
 
 #include <ctype.h>
-#include <lexer.h>
+#include <lexer/lexer.h>
 #include <strings.h>
 
 void init_token(Token* token,

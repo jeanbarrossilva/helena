@@ -16,7 +16,7 @@
  * the License.
  */
 
-#include <argparser.h>
+#include <argparser/argparser.h>
 #include <argparser/owned_array.h>
 #include <getopt.h>
 #include <hx/string.h>
