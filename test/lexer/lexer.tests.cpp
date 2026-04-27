@@ -16,19 +16,28 @@
  * the License.
  */
 
-#ifndef LEXER_TESTS_STRRAND_H
-#define LEXER_TESTS_STRRAND_H
+extern "C" {
+#include <lexer/lexer.h>
+}
 
-#include <stddef.h>
+#include <doctest.hpp>
 
-/**
- * Generates a null-terminated random string composed by printable ASCII
- * characters.
- *
- * @param string Pointer to the string.
- * @param length Amount of characters which can be put into the string,
- * disregarding the null character '\0' at length + 1.
- */
-void strrand(char* string, size_t length);
-
-#endif  // !LEXER_TESTS_STRRAND_H
+TEST_CASE("Tokenizes") {
+  Token* tokens = (Token*)malloc(3 * sizeof(Token));
+  lexer_tokenize("Hello,\nworld!", tokens);
+  CHECK(tokens[0].row == 0);
+  CHECK(tokens[0].column == 0);
+  CHECK(strncmp(tokens[0].text, "Hello,", 6) == 0);
+  CHECK(tokens[0].length == 6);
+  CHECK(tokens[0].span == 6);
+  CHECK(tokens[1].row == 0);
+  CHECK(tokens[1].column == tokens[0].length);
+  CHECK(tokens[1].length == 1);
+  CHECK(tokens[1].span == 1);
+  CHECK(tokens[2].row == 1);
+  CHECK(tokens[2].column == 0);
+  CHECK(strncmp(tokens[2].text, "world!", 6) == 0);
+  CHECK(tokens[2].length == 6);
+  CHECK(tokens[2].span == 6);
+  free(tokens);
+}

@@ -19,6 +19,7 @@ include(HelenaTestPlan)
 
 add_executable(helenaLexerTests
   configuration.cpp
+  lexer.tests.cpp
   strrand.c
   strrand.tests.cpp
   token_general_checkers.tests.cpp

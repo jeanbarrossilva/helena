@@ -27,7 +27,7 @@ TEST_CASE("Token with only a digit is not an ID") {
   char* text;
   CHECK(asprintf(&text, "%d", prefix));
   Token* token = (Token*)malloc(sizeof(Token));
-  init_token(token, 0, 0, text);
+  init_token(token, 0, 0, text, 1, 1);
   CHECK(!token_is_id(token));
   free(token);
 }
@@ -37,28 +37,28 @@ TEST_CASE("Token prefixed by a digit and followed by letters is not an ID") {
   char* text;
   CHECK(asprintf(&text, "%dID", prefix));
   Token* token = (Token*)malloc(sizeof(Token));
-  init_token(token, 0, 0, text);
+  init_token(token, 0, 0, text, 3, 3);
   CHECK(!token_is_id(token));
   free(token);
 }
 
 TEST_CASE("Token with only a letter is an ID") {
   Token* token = (Token*)malloc(sizeof(Token));
-  init_token(token, 0, 0, "h");
+  init_token(token, 0, 0, "h", 1, 1);
   CHECK(token_is_id(token));
   free(token);
 }
 
 TEST_CASE("Token with only letters is an ID") {
   Token* token = (Token*)malloc(sizeof(Token));
-  init_token(token, 0, 0, "helena");
+  init_token(token, 0, 0, "helena", 6, 6);
   CHECK(token_is_id(token));
   free(token);
 }
 
 TEST_CASE("Token prefixed by a letter and followed by digits is an ID") {
   Token* token = (Token*)malloc(sizeof(Token));
-  init_token(token, 0, 0, "h06");
+  init_token(token, 0, 0, "h06", 3, 3);
   CHECK(token_is_id(token));
   free(token);
 }
