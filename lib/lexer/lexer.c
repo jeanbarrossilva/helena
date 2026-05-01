@@ -23,11 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * Amount of bytes allocated by default for arrays when extracting tokens from
- * Helena source.
- */
-static const size_t INITIAL_ARRAY_CAPACITY = 8;
+static bool (*TOKEN_CHECKERS[TOKEN_CHECKER_COUNT])(const Token*) = {
+    &token_is_attributor, &token_is_var_keyword, &token_is_id,
+    &token_is_newline, &token_is_whitespace};
 
 static void lexer_append_token(Token** tokens,
                                const size_t column,

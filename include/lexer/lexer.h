@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define TOKEN_CHECKER_COUNT 5
+
 /**
  * Tokens are the smallest unit of semantic meaning in Helena, consisting of a
  * keyword or a sequence of symbols, by which all declarations and expressions
@@ -65,6 +67,21 @@ struct Token {
    */
   size_t span;
 } typedef Token;
+
+/**
+ * Token checkers are functions that, when they return true, denote the presence
+ * of the token on which their check is based in some Helena source (i.e.,
+ * NUL-terminated string).
+ *
+ * For a source, the token equivalent to a certain checker will be extracted
+ * upon tokenization by whether such checker first returns true on a character,
+ * until false is returned on a character after that first one.
+ *
+ * Token checkers are ordered by priority, whereas those that are constructs of
+ * the language (e.g., keywords) are placed before user-defined ones (e.g.,
+ * identifiers) in this array.
+ */
+static bool (*TOKEN_CHECKERS[TOKEN_CHECKER_COUNT])(const Token*);
 
 /**
  * Extracts tokens from the given Helene source code.
