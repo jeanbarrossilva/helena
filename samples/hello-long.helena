@@ -1,0 +1,9 @@
+link standard/io;
+
+let main _:@string[] = {
+  let ?*name = nil as ?*@string;
+  name = @string.init "helena";
+  name?.capitalize;
+  print "Hello, \(#~name)!\n";
+  name.free;
+}

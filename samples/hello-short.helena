@@ -1,0 +1,5 @@
+link standard/io;
+
+let main _:@string[] = {
+  print "Hello, Helena!\n";
+}

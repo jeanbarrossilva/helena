@@ -1,0 +1,11 @@
+link standard/io;
+
+let main arguments:@string[] -> @void'@uint.parsing_error = {
+  let n = ^(@uint.parse (arguments.get 0));
+  let *N = @array.init sized:n;
+  for i in (0.range to:N.size) {
+    N.set at:i, to:(2 if i == 0 else (#~(N.get at:(i - 1))).times 2);
+  }
+  print "\(~N)\n";
+  N.free;
+}

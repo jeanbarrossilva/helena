@@ -1,0 +1,31 @@
+link standard/io;
+
+let main _:@string[] {
+  let N = @linked_list.init @uint;
+  for n in (0.range to:7) {
+    N.prepend n
+  }
+  while N.head != nil {
+    print "\(~(~(N.head).element))"
+  }
+}
+
+let @linked_list init @element = {
+  let ?*_head = (@node @element).nil;
+  let *_length = @uint.init 0;
+  struct {
+    let ?&head = _head?.const;
+    let &length = _length.const;
+
+    let prepend element:@element = {
+      let *new_head = @node.init element, next:head;
+      _head = new_head;
+      length += 1;
+    }
+  }
+}
+
+let @linked_list.node init @element = struct {
+  element:&@element,
+  next:?&(@node @element)
+}
