@@ -1,124 +1,110 @@
 const std = @import("std");
 const testing = std.testing;
+const utf8 = @import("utf8.zig");
 
-pub const Token = union(enum) {
-    double_quote,
-    at,
-    colon,
-    equals,
-    identifier: []const u8,
-    lcurly,
-    let,
-    link,
-    lsquare,
-    newline,
-    path: []const u8,
-    rcurly,
-    rsquare,
-    semicolon,
-    literal: []const u8,
-    whitespace,
+const tokens = @import("tokens.zig");
+const LocalizedToken = tokens.LocalizedToken;
+const Token = tokens.Token;
 
-    fn text(self: Token) []const u21 {
-        return switch (self) {
-            .double_quote => "\"",
-            .at => "@",
-            .colon => ",",
-            .equals => "=",
-            .identifier => |_text| _text,
-            .lcurly => "{",
-            .let => "let",
-            .link => "link",
-            .lsquare => "[",
-            .newline => "\n",
-            .path => |_text| _text,
-            .rcurly => "}",
-            .rsquare => "]",
-            .semicolon => ";",
-            .literal => |_text| _text,
-            .whitespace => " ",
-        };
-    }
+pub const ParsedSource = struct {
+    tokens: []const LocalizedToken,
+    diagnostics: []const Diagnostic,
+};
+pub const Diagnostic = struct {
+    text: []const u8,
+    row: usize,
+    column: usize,
+    message: []const u8,
 };
 
-const standalone_tokens = &[_]Token{
-    .double_quote,
-    .at,
-    .colon,
-    .equals,
-    .lcurly,
-    .let,
-    .link,
-    .lsquare,
-    .newline,
-    .rcurly,
-    .rsquare,
-    .semicolon,
-    .whitespace,
+const empty_parsed_source = ParsedSource{
+    .tokens = &.{},
+    .diagnostics = &.{},
 };
 
-pub fn tokenize(allocator: std.mem.Allocator, source: []const u8) ![]Token {
+pub fn tokenize(allocator: std.mem.Allocator, source: []const u8) !ParsedSource {
     if (source.len == 0)
-        return &[_]Token{};
-    const source_view = try std.unicode.Utf8View.init(source);
-    var source_iterator = source_view.iterator();
-    var tokens = std.ArrayList(Token).empty;
-    var query = std.ArrayList(u21).empty;
-    var results = std.ArrayList(Token).empty;
+        return empty_parsed_source;
+    var index: usize = 0;
+    var row: usize = 0;
+    var column: usize = 0;
+    var head: ?usize = null;
+    var _tokens = std.ArrayList(LocalizedToken).empty;
+    var diagnostics = std.ArrayList(Diagnostic).empty;
+    var is_in_literal = false;
     while (true) {
-        const codepoints = source_iterator.peek(1);
-        if (codepoints.len == 0)
-            break;
-        try query.append(allocator, codepoints[0]);
-        for (standalone_tokens) |token| {
-            const text = token.text();
-            if (!lookUp(source_iterator, text))
-                continue;
-            for (0..results.items.len) |index|
-                if (!isPrefixed(results.items[index].text(), query.items))
-                    results.orderedRemove(index);
-            try results.append(allocator, token);
+        const character = if (index < source.len) source[index] else 0;
+        if (is_in_literal) {
+            if (tokens.isLiteralDelimiter(character)) {
+                if (head) |_head| {
+                    try _tokens.append(allocator, .{
+                        .unlocalized = .{
+                            .literal = source[(_head + 1)..index],
+                        },
+                        .row = row,
+                        .column = column,
+                    });
+                    head = null;
+                    is_in_literal = false;
+                }
+            }
+        } else if (tokens.isLiteralDelimiter(character)) {
+            head = index;
+            is_in_literal = true;
+        } else if (character == ' ' or character == '\n' or character == '\t') {
+            if (Token.find(&.{character})) |separator_type|
+                try _tokens.append(allocator, .{
+                    .unlocalized = separator_type,
+                    .row = row,
+                    .column = column,
+                });
+        } else if (head == null) {
+            head = index;
+        } else if (head) |_head| {
+            const text = source[_head..index];
+            if (Token.find(text)) |token_type| {
+                try _tokens.append(allocator, .{
+                    .unlocalized = token_type,
+                    .row = row,
+                    .column = column,
+                });
+            } else {
+                try diagnostics.append(allocator, .{
+                    .text = text,
+                    .row = row,
+                    .column = column,
+                    .message = try std.fmt.allocPrint(
+                        allocator,
+                        "Unexpected token: {s}",
+                        .{text},
+                    ),
+                });
+            }
+            head = null;
         }
-        if (results.len > 0) {
-            tokens.append(allocator, results[0]);
-        } else {
-            // an unknown token was found here. a diagnostic should be issued,
-            // containing information about such token and its location in the
-            // source.
+        switch (character) {
+            0 => break,
+            '\n' => row += 1,
+            else => column += 1,
         }
+        index += 1;
     }
-    results.deinit(allocator);
-    query.deinit(allocator);
-    tokens.deinit(allocator);
-    return tokens;
-}
-
-fn lookUp(iterator: std.unicode.Utf8Iterator, text: []const u21) bool {
-    // because we are the ones passing 'text' into here, no check on its
-    // contents (e.g., is it empty?) is done. we always assume that it's
-    // sensical.
-    if (iterator.peek(text.len) != text)
-        return false;
-    for (0..text.len) |_|
-        iterator.nextCodepoint();
-    return true;
-}
-
-fn isPrefixed(self: []u21, prefix: []u21) bool {
-    if (self.ptr == prefix.ptr) return true;
-    if (self.len < prefix.len) return false;
-    for (0..prefix.len) |index|
-        if (self[index] != prefix[index])
-            return false;
+    _tokens.deinit(allocator);
+    diagnostics.deinit(allocator);
+    return .{
+        .tokens = _tokens.items,
+        .diagnostics = &.{},
+    };
 }
 
 test "returns empty slice for empty source" {
-    const tokens = try tokenize(std.testing.allocator, "");
-    try testing.expectEqual(tokens.len, 0);
+    const parsed_source = try tokenize(std.testing.allocator, "");
+    try testing.expectEqual(parsed_source.tokens.len, 0);
 }
 
 test "tokenizes 'hello, world' source" {
-    const tokens = try tokenize(std.testing.allocator,
+    const allocator = std.testing.allocator;
+    const parsed_source = try tokenize(allocator,
         \\ link standard/io
         \\
         \\ let main _:@string[] {
@@ -126,41 +112,51 @@ test "tokenizes 'hello, world' source" {
         \\   print message;
         \\ }
     );
-    try testing.expectEqualSlices(Token, &[_]Token{
-        .link,
-        .whitespace,
-        .{ .path = "standard/io" },
-        .newline,
-        .newline,
-        .let,
-        .{ .identifier = "main" },
-        .whitespace,
-        .{ .identifier = "_" },
-        .colon,
-        .at,
-        .{ .identifier = "string" },
-        .lsquare,
-        .rsquare,
-        .whitespace,
-        .lcurly,
-        .newline,
-        .whitespace,
-        .whitespace,
-        .let,
-        .whitespace,
-        .{ .identifier = "message" },
-        .whitespace,
-        .equals,
-        .whitespace,
-        .double_quote,
-        .{ .literal = "Hello, world!" },
-        .double_quote,
-        .semicolon,
-        .newline,
-        .whitespace,
-        .whitespace,
-        .{ .identifier = "print" },
-        .whitespace,
-        .{ .identifier = "message" },
-    }, tokens);
+    var token_types = try std.ArrayList(Token).initCapacity(
+        allocator,
+        parsed_source.tokens.len,
+    );
+    for (parsed_source.tokens) |token|
+        try token_types.append(allocator, token.unlocalized);
+    try testing.expectEqualSlices(
+        Token,
+        &[_]Token{
+            .link,
+            .whitespace,
+            .{ .path = "standard/io" },
+            .newline,
+            .newline,
+            .let,
+            .{ .identifier = "main" },
+            .whitespace,
+            .{ .identifier = "_" },
+            .colon,
+            .at,
+            .{ .identifier = "string" },
+            .lsquare,
+            .rsquare,
+            .whitespace,
+            .lcurly,
+            .newline,
+            .whitespace,
+            .whitespace,
+            .let,
+            .whitespace,
+            .{ .identifier = "message" },
+            .whitespace,
+            .equals,
+            .whitespace,
+            .double_quote,
+            .{ .literal = "Hello, world!" },
+            .double_quote,
+            .semicolon,
+            .newline,
+            .whitespace,
+            .whitespace,
+            .{ .identifier = "print" },
+            .whitespace,
+            .{ .identifier = "message" },
+        },
+        token_types.items,
+    );
 }
