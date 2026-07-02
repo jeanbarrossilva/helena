@@ -1,110 +1,195 @@
 const std = @import("std");
 const testing = std.testing;
-const utf8 = @import("utf8.zig");
-
 const tokens = @import("tokens.zig");
-const LocalizedToken = tokens.LocalizedToken;
 const Token = tokens.Token;
 
-pub const ParsedSource = struct {
-    tokens: []const LocalizedToken,
+pub const TokenizationResult = struct {
+    locations: []const Location,
     diagnostics: []const Diagnostic,
+
+    pub fn destroy(
+        self: *const TokenizationResult,
+        allocator: std.mem.Allocator,
+    ) void {
+        if (self == &empty_tokenization_result)
+            return;
+        allocator.free(self.locations);
+        allocator.free(self.diagnostics);
+        allocator.destroy(self);
+    }
 };
-pub const Diagnostic = struct {
-    text: []const u8,
+pub const Location = struct {
+    token: Token,
     row: usize,
     column: usize,
-    message: []const u8,
+};
+pub const Diagnostic = union(enum) {
+    unterminated_literal: struct {
+        row: usize,
+        column: usize,
+    },
 };
 
-const empty_parsed_source = ParsedSource{
-    .tokens = &.{},
+const Context = union(enum) {
+    literal: struct {
+        row: usize,
+        column: usize,
+        index: usize,
+    },
+};
+
+const empty_tokenization_result = TokenizationResult{
+    .locations = &.{},
     .diagnostics = &.{},
 };
 
-pub fn tokenize(allocator: std.mem.Allocator, source: []const u8) !ParsedSource {
-    if (source.len == 0)
-        return empty_parsed_source;
-    var index: usize = 0;
+pub fn tokenize(
+    allocator: std.mem.Allocator,
+    src: []const u8,
+) !*const TokenizationResult {
+    if (src.len == 0)
+        return &empty_tokenization_result;
+    var context: ?Context = null;
+    var locations = std.ArrayList(Location).empty;
+    var diagnostics = std.ArrayList(Diagnostic).empty;
+    const result = try allocator.create(TokenizationResult);
     var row: usize = 0;
     var column: usize = 0;
-    var head: ?usize = null;
-    var _tokens = std.ArrayList(LocalizedToken).empty;
-    var diagnostics = std.ArrayList(Diagnostic).empty;
-    var is_in_literal = false;
-    while (true) {
-        const character = if (index < source.len) source[index] else 0;
-        if (is_in_literal) {
-            if (tokens.isLiteralDelimiter(character)) {
-                if (head) |_head| {
-                    try _tokens.append(allocator, .{
-                        .unlocalized = .{
-                            .literal = source[(_head + 1)..index],
+    var word_index: ?usize = null;
+    var character_index: usize = 0;
+    errdefer result.destroy(allocator);
+    errdefer locations.deinit(allocator);
+    errdefer diagnostics.deinit(allocator);
+    while (true) : (character_index += 1) {
+        const character = if (character_index < src.len)
+            src[character_index]
+        else
+            null;
+        if (character) |char| {
+            if (context) |ctx| {
+                switch (ctx) {
+                    .literal => |c| if (Token.isLiteralDelimiter(char)) {
+                        context = null;
+                        word_index = null;
+                        try locations.append(allocator, .{
+                            .token = .{
+                                .literal = src[(c.index + Token.literal_delimiter_len)..character_index],
+                            },
+                            .row = c.row,
+                            .column = c.column,
+                        });
+                    },
+                }
+            } else if (Token.isLiteralDelimiter(char)) {
+                context = .{
+                    .literal = .{
+                        .row = row,
+                        .column = column,
+                        .index = character_index,
+                    },
+                };
+                word_index = character_index;
+            } else if (word_index == null)
+                word_index = character_index;
+        }
+        if (context) |ctx| {
+            switch (ctx) {
+                .literal => |location| if (character == null)
+                    try diagnostics.append(allocator, .{
+                        .unterminated_literal = .{
+                            .row = location.row,
+                            .column = location.column,
                         },
+                    }),
+            }
+        } else {
+            if (word_index) |word_idx| {
+                const text = src[word_idx..character_index];
+                if (Token.word(text)) |word|
+                    try locations.append(allocator, .{
+                        .token = word,
+                        .row = row,
+                        .column = column -| text.len,
+                    });
+            }
+            if (character) |char| {
+                if (Token.separator(char)) |separator| {
+                    try locations.append(allocator, .{
+                        .token = separator,
                         .row = row,
                         .column = column,
                     });
-                    head = null;
-                    is_in_literal = false;
                 }
             }
-        } else if (tokens.isLiteralDelimiter(character)) {
-            head = index;
-            is_in_literal = true;
-        } else if (character == ' ' or character == '\n' or character == '\t') {
-            if (Token.find(&.{character})) |separator_type|
-                try _tokens.append(allocator, .{
-                    .unlocalized = separator_type,
-                    .row = row,
-                    .column = column,
-                });
-        } else if (head == null) {
-            head = index;
-        } else if (head) |_head| {
-            const text = source[_head..index];
-            if (Token.find(text)) |token_type| {
-                try _tokens.append(allocator, .{
-                    .unlocalized = token_type,
-                    .row = row,
-                    .column = column,
-                });
+            word_index = null;
+        }
+        if (character) |char| {
+            if (Token.isLineDelimiter(char)) {
+                row += 1;
+                column = 0;
             } else {
-                try diagnostics.append(allocator, .{
-                    .text = text,
-                    .row = row,
-                    .column = column,
-                    .message = try std.fmt.allocPrint(
-                        allocator,
-                        "Unexpected token: {s}",
-                        .{text},
-                    ),
-                });
+                column += 1;
             }
-            head = null;
+        } else {
+            break;
         }
-        switch (character) {
-            0 => break,
-            '\n' => row += 1,
-            else => column += 1,
-        }
-        index += 1;
     }
-    _tokens.deinit(allocator);
-    diagnostics.deinit(allocator);
-    return .{
-        .tokens = _tokens.items,
-        .diagnostics = &.{},
+    result.* = .{
+        .locations = try locations.toOwnedSlice(allocator),
+        .diagnostics = try diagnostics.toOwnedSlice(allocator),
     };
+    return result;
 }
 
 test "returns empty slice for empty source" {
-    const parsed_source = try tokenize(std.testing.allocator, "");
-    try testing.expectEqual(parsed_source.tokens.len, 0);
+    const result = try tokenize(std.testing.allocator, "");
+    try testing.expectEqual(empty_tokenization_result, result.*);
+    _ = result.destroy(std.testing.allocator);
+}
+
+test "tokenizes literal" {
+    const result = try tokenize(
+        std.testing.allocator,
+        "\"Hello, world!\"",
+    );
+    try testing.expectEqualDeep(
+        TokenizationResult{
+            .locations = &.{.{
+                .token = .{ .literal = "Hello, world!" },
+                .row = 0,
+                .column = 0,
+            }},
+            .diagnostics = &.{},
+        },
+        result.*,
+    );
+    _ = result.destroy(std.testing.allocator);
+}
+
+test "tokenizes link" {
+    const result = try tokenize(
+        std.testing.allocator,
+        "link standard/io",
+    );
+    try testing.expectEqualDeep(
+        TokenizationResult{
+            .locations = &.{
+                .{ .token = .link, .row = 0, .column = 0 },
+                .{
+                    .token = .{ .identifier = "standard/io" },
+                    .row = 0,
+                    .column = 5,
+                },
+            },
+            .diagnostics = &.{},
+        },
+        result.*,
+    );
+    _ = result.destroy(std.testing.allocator);
 }
 
 test "tokenizes 'hello, world' source" {
-    const allocator = std.testing.allocator;
-    const parsed_source = try tokenize(allocator,
+    const result = try tokenize(std.testing.allocator,
         \\ link standard/io
         \\
         \\ let main _:@string[] {
@@ -112,18 +197,18 @@ test "tokenizes 'hello, world' source" {
         \\   print message;
         \\ }
     );
-    var token_types = try std.ArrayList(Token).initCapacity(
-        allocator,
-        parsed_source.tokens.len,
+    var _tokens = try std.ArrayList(Token).initCapacity(
+        std.testing.allocator,
+        result.locations.len,
     );
-    for (parsed_source.tokens) |token|
-        try token_types.append(allocator, token.unlocalized);
+    for (result.locations) |location|
+        try _tokens.append(std.testing.allocator, location.token);
     try testing.expectEqualSlices(
         Token,
         &[_]Token{
             .link,
             .whitespace,
-            .{ .path = "standard/io" },
+            .{ .identifier = "standard/io" },
             .newline,
             .newline,
             .let,
@@ -133,10 +218,10 @@ test "tokenizes 'hello, world' source" {
             .colon,
             .at,
             .{ .identifier = "string" },
-            .lsquare,
-            .rsquare,
+            .left_square_bracket,
+            .right_square_bracket,
             .whitespace,
-            .lcurly,
+            .left_curly_brace,
             .newline,
             .whitespace,
             .whitespace,
@@ -146,9 +231,7 @@ test "tokenizes 'hello, world' source" {
             .whitespace,
             .equals,
             .whitespace,
-            .double_quote,
             .{ .literal = "Hello, world!" },
-            .double_quote,
             .semicolon,
             .newline,
             .whitespace,
@@ -157,6 +240,8 @@ test "tokenizes 'hello, world' source" {
             .whitespace,
             .{ .identifier = "message" },
         },
-        token_types.items,
+        _tokens.items,
     );
+    _ = result.destroy(std.testing.allocator);
+    tokens.deinit(std.testing.allocator);
 }
